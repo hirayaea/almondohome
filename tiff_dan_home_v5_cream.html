@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --peach:#e8a882; --peach-light:#f0c8b0; --peach-pale:#fdf5f0; --peach-deep:#c07858;
+    --cream:#fdfaf5; --cream-dark:#f5ede0; --cream-mid:#ede0d0;
+    --header-bg:#faf3ea; --header-border:#e8d8c4;
+    --ink:#2a2018; --mid:#8a7868; --soft:#b8a898; --border:#e8ddd0; --white:#fff;
+    --star:#d4a84b; --gold:#c49040;
+    --font-display:'Playfair Display',Georgia,serif; --font-body:'Inter',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:var(--font-body);background:var(--cream);color:var(--ink);min-height:100vh;font-size:13px;}
+
+  /* HEADER */
+  header{background:var(--header-bg);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px solid var(--header-border);box-shadow:0 2px 12px rgba(180,140,100,0.1);}
+  .h-left{display:flex;flex-direction:column;gap:3px;}
+  .h-name{color:var(--ink);font-family:var(--font-display);font-size:1.4rem;font-weight:700;letter-spacing:0.01em;line-height:1;}
+  .h-name em{font-style:normal;color:var(--star);font-weight:600;margin:0 7px;font-size:1rem;}
+  .h-sub{color:var(--soft);font-size:0.67rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;margin-top:1px;}
+  .h-right{display:flex;align-items:center;gap:8px;}
+  .h-stars{color:var(--star);font-size:0.75rem;letter-spacing:4px;opacity:0.7;}
+  .h-date{background:var(--cream-dark);border:1px solid var(--border);border-radius:20px;padding:5px 12px;color:var(--mid);font-size:0.72rem;font-weight:500;}
+
+  /* TABS */
+  .tabs{display:flex;background:var(--white);border-bottom:1px solid var(--border);padding:0 18px;overflow-x:auto;gap:2px;}
+  .tab-btn{background:none;border:none;padding:11px 16px 10px;font-family:var(--font-body);font-size:0.8rem;font-weight:600;color:var(--soft);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.18s;white-space:nowrap;display:flex;align-items:center;gap:6px;letter-spacing:0.01em;}
+  .tab-btn:hover{color:var(--peach-deep);}
+  .tab-btn.active{color:var(--peach-deep);border-bottom-color:var(--peach-deep);}
+  .badge{background:var(--peach-deep);color:#fff;font-size:0.62rem;font-weight:700;border-radius:9px;padding:1px 6px;min-width:17px;text-align:center;}
+
+  /* PANEL */
+  .panel{display:none;padding:20px 20px 48px;max-width:880px;margin:0 auto;}
+  .panel.active{display:block;}
+  .pg-title{font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--ink);margin-bottom:3px;display:flex;align-items:center;gap:7px;}
+  .pg-title .star{color:var(--star);font-size:0.85rem;font-family:var(--font-body);}
+  .pg-sub{color:var(--mid);font-size:0.76rem;margin-bottom:16px;line-height:1.5;}
+
+  /* CARD */
+  .card{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:16px;box-shadow:0 1px 6px rgba(180,140,100,0.08);}
+
+  /* SEARCH BAR */
+  .search-wrap{position:relative;padding:11px 14px;background:var(--cream-dark);border-bottom:1px solid var(--border);}
+  .search-wrap input{width:100%;padding:7px 12px 7px 32px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:0.8rem;background:var(--white);color:var(--ink);outline:none;transition:border-color 0.18s;}
+  .search-wrap input:focus{border-color:var(--peach-deep);}
+  .search-wrap input::placeholder{color:var(--soft);}
+  .search-icon{position:absolute;left:24px;top:50%;transform:translateY(-50%);color:var(--soft);font-size:0.8rem;pointer-events:none;}
+
+  /* TABLE */
+  table{width:100%;border-collapse:collapse;}
+  thead th{background:var(--cream-dark);font-size:0.66rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--mid);padding:8px 14px;text-align:left;border-bottom:1px solid var(--border);}
+  thead th.r{background:#f5ede4;color:var(--peach-deep);}
+  tbody tr{border-bottom:1px solid var(--border);transition:background 0.12s;}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:hover{background:var(--peach-pale);}
+  tbody tr.done-row{opacity:0.4;}
+  tbody td{padding:8px 14px;font-size:0.82rem;vertical-align:middle;}
+
+  /* CHECKBOX */
+  .chk{width:17px;height:17px;border:1.5px solid var(--peach-light);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;flex-shrink:0;background:var(--white);}
+  .chk.checked{background:var(--peach-deep);border-color:var(--peach-deep);}
+  .chk.checked::after{content:'✓';color:#fff;font-size:9px;font-weight:800;}
+
+  /* ADD ROW */
+  .add-row{display:flex;gap:7px;padding:11px 14px;background:var(--cream-dark);border-top:1px solid var(--border);flex-wrap:wrap;}
+  .add-row input,.add-row select{flex:1;min-width:80px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:0.8rem;background:var(--white);color:var(--ink);outline:none;transition:border-color 0.18s;}
+  .add-row input:focus,.add-row select:focus{border-color:var(--peach-deep);}
+  .add-row input::placeholder{color:var(--soft);}
+  .btn-add{background:var(--ink);color:#fff;border:none;border-radius:8px;padding:7px 15px;font-family:var(--font-body);font-weight:600;font-size:0.78rem;cursor:pointer;transition:opacity 0.18s;white-space:nowrap;}
+  .btn-add:hover{opacity:0.78;}
+  .btn-add.b{background:var(--gold);}
+
+  /* TOTAL BAR */
+  .tbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:10px 14px;border-top:1px solid var(--border);background:var(--cream-dark);font-size:0.78rem;color:var(--mid);}
+  .tbar.b{background:#f5ede4;}
+  .tbar strong{font-size:0.95rem;font-weight:700;color:var(--ink);}
+
+  /* PILLS */
+  .pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:0.68rem;font-weight:700;cursor:pointer;user-select:none;letter-spacing:0.02em;transition:opacity 0.15s;}
+  .pill:hover{opacity:0.72;}
+  .pill.todo{background:var(--cream-dark);color:var(--mid);}
+  .pill.inprog{background:#fef3d8;color:#a07828;}
+  .pill.done{background:#edf5ec;color:#4a8a58;}
+  .pill.skip{background:#f2efed;color:var(--soft);}
+
+  /* TAGS */
+  .who{display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.68rem;font-weight:700;}
+  .who-t{background:var(--peach-pale);color:var(--peach-deep);}
+  .who-d{background:#fef8e8;color:#a07828;}
+  .who-b{background:#f5eef8;color:#8050a0;}
+  .who-r{background:#f2efed;color:var(--soft);}
+  .cond{display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.68rem;font-weight:600;}
+  .cond-new{background:var(--peach-pale);color:var(--peach-deep);}
+  .cond-exc{background:#fef8e8;color:#a07828;}
+  .cond-good{background:#f2efed;color:#6a5040;}
+  .cond-fair{background:#f5f0ee;color:var(--soft);}
+  .cond-rep{background:#fdf0ee;color:#c05050;}
+  .who-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:700;}
+  .who-tag-t{background:var(--peach-pale);color:var(--peach-deep);}
+  .who-tag-d{background:#fef8e8;color:#a07828;}
+
+  .btn-del{background:none;border:none;color:var(--border);cursor:pointer;font-size:0.82rem;padding:2px 5px;border-radius:4px;transition:color 0.15s;}
+  .btn-del:hover{color:#c05050;}
+
+  /* TILES */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:11px;margin-bottom:16px;}
+  .tile{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:13px 10px;text-align:center;box-shadow:0 1px 4px rgba(180,140,100,0.06);}
+  .tile-num{font-family:var(--font-display);font-size:1.6rem;font-weight:700;color:var(--ink);line-height:1;}
+  .tile-num.g{color:var(--gold);}
+  .tile-label{font-size:0.63rem;font-weight:600;color:var(--soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.06em;}
+
+  /* DIVIDER */
+  .divider{display:flex;align-items:center;gap:12px;margin:6px 0 16px;}
+  .divider-label{font-size:0.68rem;font-weight:700;color:var(--soft);letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* SPEND */
+  .spend-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+  .spend-tile{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:0 1px 5px rgba(180,140,100,0.06);}
+  .spend-tile h4{font-size:0.65rem;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:9px;}
+  .spend-big{font-family:var(--font-display);font-size:1.9rem;font-weight:700;color:var(--ink);line-height:1;}
+  .spend-big.over{color:#c05050;}
+  .spend-sub{font-size:0.73rem;color:var(--mid);margin-top:5px;}
+  .budget-row{display:flex;align-items:center;gap:8px;margin-top:11px;flex-wrap:wrap;}
+  .budget-row label{font-size:0.73rem;color:var(--soft);white-space:nowrap;font-weight:500;}
+  .budget-row input{width:100px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:0.8rem;color:var(--ink);background:var(--cream-dark);outline:none;}
+  .budget-row input:focus{border-color:var(--peach-deep);}
+  .prog-wrap{margin-top:12px;}
+  .prog-labels{display:flex;justify-content:space-between;font-size:0.69rem;color:var(--soft);margin-bottom:5px;font-weight:500;}
+  .prog-bar{height:7px;background:var(--cream-dark);border-radius:99px;overflow:hidden;border:1px solid var(--border);}
+  .prog-fill{height:100%;border-radius:99px;background:var(--peach-deep);transition:width 0.4s ease;}
+  .prog-fill.warn{background:#d4a040;}
+  .prog-fill.over{background:#c05050;}
+  .log-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--cream-dark);}
+  .log-head h3{font-family:var(--font-display);font-size:0.9rem;font-weight:600;color:var(--ink);}
+  .btn-clear{background:none;border:1px solid var(--border);border-radius:7px;padding:3px 10px;font-size:0.7rem;color:var(--soft);cursor:pointer;font-family:var(--font-body);font-weight:600;transition:all 0.18s;}
+  .btn-clear:hover{border-color:#c05050;color:#c05050;}
+
+  .empty-row td{text-align:center;color:var(--soft);font-style:italic;padding:22px;font-size:0.78rem;}
+
+  @media(max-width:580px){
+    .spend-grid{grid-template-columns:1fr;}
+    .add-row{flex-direction:column;}
+    .add-row input,.add-row select{min-width:unset;}
+    header{padding:13px 15px;}
+    .tiles{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-left">
+    <div class="h-name">Tiff <em>✦</em> Dan</div>
+    <div class="h-sub">Home Organiser</div>
+  </div>
+  <div class="h-right">
+    <div class="h-stars">✦ ✧ ✦</div>
+    <div class="h-date" id="date-display"></div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('grocery',this)">🛒 Grocery <span class="badge" id="badge-grocery">0</span></button>
+  <button class="tab-btn" onclick="showTab('inventory',this)">🏠 Inventory <span class="badge" id="badge-inv">0</span></button>
+  <button class="tab-btn" onclick="showTab('chores',this)">✅ Chores <span class="badge" id="badge-chores">0</span></button>
+</div>
+
+<!-- GROCERY -->
+<div class="panel active" id="panel-grocery">
+  <div class="pg-title"><span class="star">✦</span> Grocery List</div>
+  <div class="pg-sub">Tick off as you shop — shared between Tiff & Dan.</div>
+  <div class="card">
+    <table>
+      <thead><tr>
+        <th style="width:32px">✓</th><th>Item</th><th>Category</th><th>Qty</th><th>Est. (£)</th><th style="width:30px"></th>
+      </tr></thead>
+      <tbody id="grocery-body"></tbody>
+    </table>
+    <div class="add-row">
+      <input id="g-item" placeholder="Item name" onkeydown="if(event.key==='Enter')addGrocery()"/>
+      <select id="g-cat"><option value="">Category</option><option>Produce</option><option>Dairy</option><option>Meat & Fish</option><option>Bakery</option><option>Pantry</option><option>Frozen</option><option>Drinks</option><option>Household</option><option>Personal Care</option><option>Other</option></select>
+      <input id="g-qty" placeholder="Qty" style="max-width:62px"/>
+      <input id="g-cost" placeholder="£ est." type="number" step="0.01" style="max-width:82px"/>
+      <button class="btn-add" onclick="addGrocery()">+ Add</button>
+    </div>
+    <div class="tbar"><span>Estimated total</span><strong id="grocery-total">£0.00</strong></div>
+  </div>
+
+  <div class="divider"><div class="divider-label">✦ Monthly Spend Tracker ✦</div></div>
+  <div class="pg-sub" style="margin-top:-10px;margin-bottom:14px">Log actual shops and track your monthly budget.</div>
+  <div class="spend-grid">
+    <div class="spend-tile">
+      <h4>Monthly Budget</h4>
+      <div class="spend-big" id="budget-display">Not set</div>
+      <div class="spend-sub">Set your grocery budget</div>
+      <div class="budget-row"><label>Budget (£)</label><input id="budget-input" type="number" step="1" placeholder="e.g. 400" oninput="updateBudget()"/></div>
+    </div>
+    <div class="spend-tile">
+      <h4>Spent This Month</h4>
+      <div class="spend-big" id="spent-display">£0.00</div>
+      <div class="spend-sub" id="remaining-display">No budget set</div>
+      <div class="prog-wrap">
+        <div class="prog-labels"><span id="prog-left">£0 spent</span><span id="prog-right">–</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="log-head"><h3>🧾 Shop Log</h3><button class="btn-clear" onclick="clearSpend()">Clear all</button></div>
+    <table>
+      <thead><tr><th>Date</th><th>Shop</th><th>Paid by</th><th>Amount (£)</th><th style="width:30px"></th></tr></thead>
+      <tbody id="spend-body"></tbody>
+    </table>
+    <div class="add-row">
+      <input id="s-date" type="date" style="max-width:140px"/>
+      <input id="s-shop" placeholder="Shop (e.g. Tesco)"/>
+      <select id="s-who"><option value="Tiff">Tiff</option><option value="Dan">Dan</option></select>
+      <input id="s-amount" placeholder="£ spent" type="number" step="0.01" style="max-width:100px" onkeydown="if(event.key==='Enter')addSpend()"/>
+      <button class="btn-add" onclick="addSpend()">+ Log</button>
+    </div>
+    <div class="tbar">
+      <span style="font-size:0.72rem">Tiff: <strong id="spend-tiff">£0.00</strong></span>
+      <span style="font-size:0.72rem;margin-left:12px">Dan: <strong id="spend-dan">£0.00</strong></span>
+      <span style="flex:1"></span>
+      <span>Total spent</span><strong id="spend-total">£0.00</strong>
+    </div>
+  </div>
+</div>
+
+<!-- INVENTORY -->
+<div class="panel" id="panel-inventory">
+  <div class="pg-title"><span class="star">✦</span> Home Inventory</div>
+  <div class="pg-sub">Track belongings by room, condition, and value.</div>
+  <div class="tiles">
+    <div class="tile"><div class="tile-num g" id="inv-count">0</div><div class="tile-label">Items</div></div>
+    <div class="tile"><div class="tile-num g" id="inv-rooms">0</div><div class="tile-label">Rooms</div></div>
+    <div class="tile"><div class="tile-num g" id="inv-value">£0</div><div class="tile-label">Est. Value</div></div>
+  </div>
+  <div class="card">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input id="inv-search" placeholder="Search by item, room, or condition…" oninput="renderInventory()"/>
+    </div>
+    <table>
+      <thead><tr>
+        <th class="r">Room</th><th class="r">Item</th><th class="r">Condition</th><th class="r">Est. (£)</th><th class="r">Notes</th><th class="r" style="width:30px"></th>
+      </tr></thead>
+      <tbody id="inv-body"></tbody>
+    </table>
+    <div class="add-row">
+      <select id="i-room"><option value="">Room</option><option>Kitchen</option><option>Living Room</option><option>Bedroom</option><option>Bathroom</option><option>Office</option><option>Hallway</option><option>Garden</option><option>Other</option></select>
+      <input id="i-item" placeholder="Item name"/>
+      <select id="i-cond"><option value="">Condition</option><option>New</option><option>Excellent</option><option>Good</option><option>Fair</option><option>Needs Repair</option></select>
+      <input id="i-val" placeholder="Value £" type="number" step="0.01" style="max-width:90px"/>
+      <input id="i-notes" placeholder="Notes"/>
+      <button class="btn-add b" onclick="addInventory()">+ Add</button>
+    </div>
+    <div class="tbar b"><span>Total estimated value</span><strong id="inv-total">£0.00</strong></div>
+  </div>
+</div>
+
+<!-- CHORES -->
+<div class="panel" id="panel-chores">
+  <div class="pg-title"><span class="star">✦</span> Chores & To-Do</div>
+  <div class="pg-sub">Tap the status pill to cycle states — who's pulling their weight? 👀</div>
+  <div class="tiles">
+    <div class="tile"><div class="tile-num" id="chore-todo">0</div><div class="tile-label">To Do</div></div>
+    <div class="tile"><div class="tile-num" id="chore-inprog">0</div><div class="tile-label">In Progress</div></div>
+    <div class="tile"><div class="tile-num" id="chore-done">0</div><div class="tile-label">Done</div></div>
+    <div class="tile"><div class="tile-num g" id="chore-total-count">0</div><div class="tile-label">Total</div></div>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Status</th><th>Chore</th><th>Frequency</th><th>Assigned</th><th style="width:30px"></th></tr></thead>
+      <tbody id="chores-body"></tbody>
+    </table>
+    <div class="add-row">
+      <input id="c-task" placeholder="Chore / task name" onkeydown="if(event.key==='Enter')addChore()"/>
+      <select id="c-freq"><option value="">Frequency</option><option>Daily</option><option>Every 2 days</option><option>Weekly</option><option>Fortnightly</option><option>Monthly</option><option>As needed</option></select>
+      <select id="c-who"><option value="">Assigned to</option><option>Tiff</option><option>Dan</option><option>Both</option><option>Rotate</option></select>
+      <button class="btn-add" onclick="addChore()">+ Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const state={grocery:[],inventory:[],chores:[],spend:[],budget:0};
+function uid(){return Math.random().toString(36).slice(2,9);}
+function fmt(n){return'£'+(parseFloat(n)||0).toFixed(2);}
+function save(){try{localStorage.setItem('tiff_dan_v5',JSON.stringify(state));}catch(e){}}
+function load(){try{const d=localStorage.getItem('tiff_dan_v5');if(d){const p=JSON.parse(d);Object.assign(state,p);}}catch(e){}}
+
+function showTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function addGrocery(){
+  const item=document.getElementById('g-item').value.trim();if(!item)return;
+  state.grocery.push({id:uid(),item,cat:document.getElementById('g-cat').value||'—',qty:document.getElementById('g-qty').value||'1',cost:parseFloat(document.getElementById('g-cost').value)||0,done:false});
+  ['g-item','g-cat','g-qty','g-cost'].forEach(id=>{const el=document.getElementById(id);el.tagName==='SELECT'?(el.selectedIndex=0):(el.value='');});
+  save();renderGrocery();
+}
+function toggleGrocery(id){const it=state.grocery.find(x=>x.id===id);if(it){it.done=!it.done;save();renderGrocery();}}
+function delGrocery(id){state.grocery=state.grocery.filter(x=>x.id!==id);save();renderGrocery();}
+function renderGrocery(){
+  const tb=document.getElementById('grocery-body');
+  if(!state.grocery.length){tb.innerHTML='<tr class="empty-row"><td colspan="6">No items yet — add your first one above ✦</td></tr>';document.getElementById('grocery-total').textContent='£0.00';document.getElementById('badge-grocery').textContent=0;return;}
+  const s=[...state.grocery].sort((a,b)=>a.done-b.done);
+  tb.innerHTML=s.map(it=>`<tr class="${it.done?'done-row':''}"><td><div class="chk ${it.done?'checked':''}" onclick="toggleGrocery('${it.id}')"></div></td><td style="${it.done?'text-decoration:line-through;color:var(--soft)':''}">${it.item}</td><td style="color:var(--soft);font-size:0.76rem">${it.cat}</td><td style="font-size:0.78rem">${it.qty}</td><td style="font-size:0.78rem">${it.cost?fmt(it.cost):'—'}</td><td><button class="btn-del" onclick="delGrocery('${it.id}')">✕</button></td></tr>`).join('');
+  document.getElementById('grocery-total').textContent=fmt(state.grocery.reduce((s,x)=>s+(x.cost||0),0));
+  document.getElementById('badge-grocery').textContent=state.grocery.filter(x=>!x.done).length;
+}
+
+function updateBudget(){state.budget=parseFloat(document.getElementById('budget-input').value)||0;save();renderSpend();}
+function addSpend(){
+  const amount=parseFloat(document.getElementById('s-amount').value);if(!amount)return;
+  state.spend.push({id:uid(),date:document.getElementById('s-date').value||new Date().toISOString().slice(0,10),shop:document.getElementById('s-shop').value.trim()||'Shop',who:document.getElementById('s-who').value,amount});
+  ['s-shop','s-amount'].forEach(id=>{document.getElementById(id).value='';});
+  save();renderSpend();
+}
+function delSpend(id){state.spend=state.spend.filter(x=>x.id!==id);save();renderSpend();}
+function clearSpend(){if(confirm('Clear all spend entries?')){state.spend=[];save();renderSpend();}}
+function renderSpend(){
+  const budget=state.budget;
+  document.getElementById('budget-display').textContent=budget?fmt(budget):'Not set';
+  document.getElementById('budget-input').value=budget||'';
+  const now=new Date(),ms=new Date(now.getFullYear(),now.getMonth(),1);
+  const mn=now.toLocaleString('en-GB',{month:'long'});
+  const me=state.spend.filter(x=>new Date(x.date)>=ms);
+  const mt=me.reduce((s,x)=>s+x.amount,0);
+  document.getElementById('spent-display').textContent=fmt(mt);
+  document.getElementById('spent-display').className='spend-big'+(budget&&mt>budget?' over':'');
+  if(budget){
+    const pct=Math.min((mt/budget)*100,100),rem=budget-mt;
+    document.getElementById('remaining-display').textContent=rem>=0?`£${rem.toFixed(2)} left in ${mn}`:`£${Math.abs(rem).toFixed(2)} over budget!`;
+    document.getElementById('prog-left').textContent=fmt(mt)+' spent';
+    document.getElementById('prog-right').textContent=fmt(budget)+' budget';
+    const f=document.getElementById('prog-fill');f.style.width=pct+'%';
+    f.className='prog-fill'+(pct>=100?' over':pct>=75?' warn':'');
+  } else {
+    document.getElementById('remaining-display').textContent=`Tracking ${mn} — set a budget above`;
+    document.getElementById('prog-left').textContent='';document.getElementById('prog-right').textContent='';
+    document.getElementById('prog-fill').style.width='0%';
+  }
+  document.getElementById('spend-tiff').textContent=fmt(state.spend.filter(x=>x.who==='Tiff').reduce((s,x)=>s+x.amount,0));
+  document.getElementById('spend-dan').textContent=fmt(state.spend.filter(x=>x.who==='Dan').reduce((s,x)=>s+x.amount,0));
+  document.getElementById('spend-total').textContent=fmt(state.spend.reduce((s,x)=>s+x.amount,0));
+  const tb=document.getElementById('spend-body');
+  if(!state.spend.length){tb.innerHTML='<tr class="empty-row"><td colspan="5">No shops logged yet ✦</td></tr>';return;}
+  tb.innerHTML=[...state.spend].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(it=>`<tr><td style="font-size:0.75rem;color:var(--soft)">${it.date}</td><td style="font-weight:600">${it.shop}</td><td><span class="who-tag ${it.who==='Tiff'?'who-tag-t':'who-tag-d'}">${it.who}</span></td><td style="font-weight:700">${fmt(it.amount)}</td><td><button class="btn-del" onclick="delSpend('${it.id}')">✕</button></td></tr>`).join('');
+}
+
+function addInventory(){
+  const item=document.getElementById('i-item').value.trim();if(!item)return;
+  state.inventory.push({id:uid(),room:document.getElementById('i-room').value||'Other',item,cond:document.getElementById('i-cond').value||'Good',val:parseFloat(document.getElementById('i-val').value)||0,notes:document.getElementById('i-notes').value.trim()});
+  ['i-room','i-item','i-cond','i-val','i-notes'].forEach(id=>{const el=document.getElementById(id);el.tagName==='SELECT'?(el.selectedIndex=0):(el.value='');});
+  save();renderInventory();
+}
+function delInventory(id){state.inventory=state.inventory.filter(x=>x.id!==id);save();renderInventory();}
+function condClass(c){return{New:'cond-new',Excellent:'cond-exc',Good:'cond-good',Fair:'cond-fair','Needs Repair':'cond-rep'}[c]||'cond-good';}
+function renderInventory(){
+  const q=(document.getElementById('inv-search').value||'').toLowerCase().trim();
+  const tb=document.getElementById('inv-body');
+  const filtered=q?state.inventory.filter(x=>[x.item,x.room,x.cond,x.notes].join(' ').toLowerCase().includes(q)):state.inventory;
+  if(!state.inventory.length){tb.innerHTML='<tr class="empty-row"><td colspan="6">Nothing logged yet ✦</td></tr>';}
+  else if(!filtered.length){tb.innerHTML=`<tr class="empty-row"><td colspan="6">No results for "${q}" ✦</td></tr>`;}
+  else{tb.innerHTML=filtered.map(it=>`<tr><td style="font-size:0.75rem;color:var(--soft)">${it.room}</td><td style="font-weight:600">${it.item}</td><td><span class="cond ${condClass(it.cond)}">${it.cond}</span></td><td style="font-size:0.78rem">${it.val?fmt(it.val):'—'}</td><td style="font-size:0.75rem;color:var(--soft)">${it.notes||'—'}</td><td><button class="btn-del" onclick="delInventory('${it.id}')">✕</button></td></tr>`).join('');}
+  const total=state.inventory.reduce((s,x)=>s+(x.val||0),0);
+  document.getElementById('inv-total').textContent=fmt(total);
+  document.getElementById('inv-count').textContent=state.inventory.length;
+  document.getElementById('inv-rooms').textContent=new Set(state.inventory.map(x=>x.room)).size;
+  document.getElementById('inv-value').textContent='£'+Math.round(total).toLocaleString();
+  document.getElementById('badge-inv').textContent=state.inventory.length;
+}
+
+const SC=['To Do','In Progress','Done','Skipped'];
+function cycleStatus(id){const it=state.chores.find(x=>x.id===id);if(!it)return;const i=SC.indexOf(it.status);it.status=SC[(i+1)%SC.length];save();renderChores();}
+function addChore(){
+  const task=document.getElementById('c-task').value.trim();if(!task)return;
+  state.chores.push({id:uid(),task,freq:document.getElementById('c-freq').value||'Weekly',who:document.getElementById('c-who').value||'Rotate',status:'To Do'});
+  ['c-task','c-freq','c-who'].forEach(id=>{const el=document.getElementById(id);el.tagName==='SELECT'?(el.selectedIndex=0):(el.value='');});
+  save();renderChores();
+}
+function delChore(id){state.chores=state.chores.filter(x=>x.id!==id);save();renderChores();}
+function pClass(s){return{'To Do':'todo','In Progress':'inprog','Done':'done','Skipped':'skip'}[s]||'todo';}
+function wClass(w){return{Tiff:'who-t',Dan:'who-d',Both:'who-b',Rotate:'who-r'}[w]||'who-r';}
+function renderChores(){
+  const tb=document.getElementById('chores-body');
+  if(!state.chores.length){tb.innerHTML='<tr class="empty-row"><td colspan="5">No chores yet — how tidy! ✦</td></tr>';['chore-todo','chore-inprog','chore-done','chore-total-count'].forEach(id=>document.getElementById(id).textContent=0);document.getElementById('badge-chores').textContent=0;return;}
+  const ord={'To Do':0,'In Progress':1,'Done':2,'Skipped':3};
+  const s=[...state.chores].sort((a,b)=>ord[a.status]-ord[b.status]);
+  tb.innerHTML=s.map(it=>`<tr style="${it.status==='Done'?'opacity:0.4':''}"><td><span class="pill ${pClass(it.status)}" onclick="cycleStatus('${it.id}')">${it.status}</span></td><td style="${it.status==='Done'?'text-decoration:line-through;color:var(--soft)':'font-weight:600'}">${it.task}</td><td style="font-size:0.76rem;color:var(--soft)">${it.freq}</td><td><span class="who ${wClass(it.who)}">${it.who}</span></td><td><button class="btn-del" onclick="delChore('${it.id}')">✕</button></td></tr>`).join('');
+  document.getElementById('chore-todo').textContent=state.chores.filter(x=>x.status==='To Do').length;
+  document.getElementById('chore-inprog').textContent=state.chores.filter(x=>x.status==='In Progress').length;
+  document.getElementById('chore-done').textContent=state.chores.filter(x=>x.status==='Done').length;
+  document.getElementById('chore-total-count').textContent=state.chores.length;
+  document.getElementById('badge-chores').textContent=state.chores.filter(x=>x.status==='To Do').length;
+}
+
+function seedChores(){
+  const d=[{task:'Vacuuming',freq:'Weekly',who:'Rotate'},{task:'Mop floors',freq:'Weekly',who:'Rotate'},{task:'Clean bathrooms',freq:'Weekly',who:'Rotate'},{task:'Wipe kitchen surfaces',freq:'Daily',who:'Both'},{task:'Take out bins',freq:'Every 2 days',who:'Rotate'},{task:'Do laundry',freq:'Weekly',who:'Rotate'},{task:'Iron clothes',freq:'Weekly',who:'Rotate'},{task:'Food shop',freq:'Weekly',who:'Rotate'},{task:'Meal prep',freq:'Weekly',who:'Both'},{task:'Water plants',freq:'Every 2 days',who:'Rotate'},{task:'Clean fridge',freq:'Monthly',who:'Rotate'}];
+  state.chores=d.map(x=>({...x,id:uid(),status:'To Do'}));
+}
+
+document.getElementById('date-display').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+document.getElementById('s-date').value=new Date().toISOString().slice(0,10);
+load();
+if(!state.chores.length)seedChores();
+renderGrocery();renderInventory();renderChores();renderSpend();
+</script>
+</body>
+</html>
